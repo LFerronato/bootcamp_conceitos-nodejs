@@ -9,6 +9,7 @@ app.use(express.json());
 app.use(cors());
 
 const repositories = [];
+
 function validateUuid(request, response, next) {
   const { id } = request.params
   if (!isUuid(id)) {
@@ -18,7 +19,6 @@ function validateUuid(request, response, next) {
 }
 //Validação do ID recebido
 app.use("/repositories/:id", validateUuid)
-
 
 // ROTAS
 app.get("/repositories", (request, response) => {
@@ -33,10 +33,10 @@ app.get("/repositories/:id", (request, response) => {
   return response.json(repository)
 });
 app.post("/repositories", (request, response) => {
-  const { title, url, techs } = request.body
+  const { id, title, url, techs } = request.body
 
   const repository = {
-    id: uuid(),
+    id: id || uuid(),
     title,
     url,
     techs,
@@ -51,7 +51,7 @@ app.put("/repositories/:id", (request, response) => {
   const { title, url, techs } = request.body
 
   const repositoryIndex = repositories.findIndex(repository => repository.id === id)
-  if (!repositoryIndex) {
+  if (repositoryIndex < 0) {
     return response.status(400).send()
   }
 
@@ -70,7 +70,8 @@ app.delete("/repositories/:id", (request, response) => {
   const { id } = request.params
 
   const repositoryIndex = repositories.findIndex(repository => repository.id === id)
-  if (!repositoryIndex) {
+
+  if (repositoryIndex < 0) {
     return response.status(400).send()
   }
   repositories.splice(repositoryIndex, 1)
